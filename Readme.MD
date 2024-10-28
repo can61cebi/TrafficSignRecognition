@@ -231,3 +231,113 @@ Harika, kamerayı çalıştırmayı başardığına sevindim! Şimdi YoloV5 ile 
    - **Pyttsx3 ile Sesli Çıktı:** Tespit edilen nesnenin adını `engine.say()` kullanarak Türkçe olarak seslendiriyoruz.
 
 Bu aşamalar tamamlandıktan sonra modeli trafik işaretlerini tanıması yönünde eğiteceğiz.
+
+Trafik işaretlerini tanımak üzere YoloV5 modelini kendi veri setinizle eğitmek için belirli adımlar atmanız gerekiyor. YoloV5’i, özel olarak trafik işaretlerini tanımak üzere eğitmek için aşağıdaki adımları takip edelim:
+
+### 1. **Veri Setinizi Hazırlama**
+Öncelikle veri setinizin Yolo formatında olduğundan emin olmalısınız. Yolo formatında her bir görüntü dosyası için ona karşılık gelen `.txt` dosyaları olmalıdır. Bu `.txt` dosyalarında her satır, bir nesnenin sınıf etiketi ve normalleştirilmiş koordinatlarını içerir.
+
+#### Yolo Veri Seti Formatı:
+- Her görüntünün `.jpg` veya `.png` dosyası olacaktır.
+- Aynı isimle her görüntü için bir `.txt` dosyası olacak.
+- `.txt` dosyası formatı:
+  ```
+  sınıf_id x_center y_center width height
+  ```
+  - `sınıf_id`: Sınıf etiketi (0, 1, 2... gibi).
+  - `x_center`, `y_center`, `width`, `height`: Normalleştirilmiş koordinatlar (0 ile 1 arasında).
+
+Örneğin, bir "Dur" işareti için `.txt` dosyanız şu şekilde olabilir:
+```
+0 0.5 0.5 0.3 0.4
+```
+
+#### Veri Seti Yapısı:
+Aşağıdaki gibi bir dizin yapısına sahip olmalısınız:
+```
+/traffic_sign_dataset
+    /images
+        /train
+            image1.jpg
+            image2.jpg
+            ...
+        /val
+            imageA.jpg
+            imageB.jpg
+            ...
+    /labels
+        /train
+            image1.txt
+            image2.txt
+            ...
+        /val
+            imageA.txt
+            imageB.txt
+            ...
+```
+
+### 2. **`data.yaml` Dosyasını Oluşturma**
+YoloV5 eğitimi için bir konfigürasyon dosyasına ihtiyacımız var. Bu dosya, veri setinizin yolunu, sınıf sayısını ve sınıf adlarını içerir. Bu dosyayı `traffic_sign_dataset/data.yaml` olarak oluşturabilirsiniz:
+
+```yaml
+train: ../traffic_sign_dataset/images/train
+val: ../traffic_sign_dataset/images/val
+
+nc: 3  # Sınıf sayısı (örneğin, "Dur", "Yol Ver", "Hız Limiti")
+names: ['Dur', 'Yol Ver', 'Hız Limiti']  # Sınıf isimleri
+```
+
+Burada:
+- `train`: Eğitim veri setinin yolu.
+- `val`: Doğrulama veri setinin yolu.
+- `nc`: Sınıf sayısı.
+- `names`: Sınıf isimleri.
+
+### 3. **YoloV5'i Eğitmek İçin Ortamı Hazırlama**
+Eğitim işlemini gerçekleştirmek için YoloV5 ortamını hazırlamanız gerekiyor. Bunun için:
+
+- YoloV5 dizininde olduğunuzdan emin olun:
+  ```bash
+  cd yolov5_model
+  ```
+- Gereksinimleri yükleyin:
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+### 4. **Modeli Eğitme**
+YoloV5'i trafik işaretlerinizi tanıyacak şekilde eğitmek için `train.py` scriptini çalıştırmalısınız:
+
+```bash
+python train.py --img 640 --batch 16 --epochs 50 --data traffic_sign_dataset/data.yaml --weights yolov5s.pt --cache
+```
+
+Açıklamalar:
+- `--img 640`: Girdi görüntüsünün boyutu. 640, Yolo için yaygın bir boyuttur ve performans ile hız arasında iyi bir denge sağlar.
+- `--batch 16`: Her iterasyonda kaç görüntü ile eğitim yapılacağını belirtir.
+- `--epochs 50`: Eğitim için toplam dönem sayısı.
+- `--data traffic_sign_dataset/data.yaml`: Eğitim için kullanılan veri seti.
+- `--weights yolov5s.pt`: Eğitimin başladığı önceden eğitilmiş model. YoloV5s, daha küçük ve hızlı bir modeldir.
+- `--cache`: Veri setini bellekte tutarak daha hızlı eğitim yapılmasını sağlar.
+
+### 5. **Eğitim Sonrası Ağırlıkların Kullanımı**
+Eğitim tamamlandığında, sonuçlar `runs/train/exp` klasörüne kaydedilecektir. Burada `best.pt` ve `last.pt` ağırlık dosyaları bulunur. Bu ağırlık dosyalarını kullanarak modeli çalıştırabilirsiniz.
+
+### 6. **Modeli Kullanma (Yeniden Entegre Etme)**
+Eğitimden sonra, `main.py` dosyanızda bu yeni ağırlıkları kullanarak modeli entegre edin:
+
+```python
+# Eğitilmiş modeli yükle
+model = torch.hub.load('yolov5_model', 'custom', path='runs/train/exp/best.pt', source='local')
+```
+
+Bu satırda, yeni eğitilmiş modelinizi kullanarak trafik işaretlerini tanımaya başlayabilirsiniz.
+
+### 7. **Modeli Test Etme**
+Modeli Flask tabanlı uygulamanızda test edebilir ve doğru şekilde trafik işaretlerini tanıdığından emin olabilirsiniz. Modelin performansını artırmak için daha fazla epoch kullanabilir veya batch boyutunu artırabilirsiniz.
+
+### Ek Notlar:
+- **Görüntü Kalitesi:** Eğitim sırasında görüntülerin kalitesi önemlidir. Düşük kaliteli görüntüler eğitim sonucunu olumsuz etkileyebilir.
+- **Veri Sayısı:** Daha fazla eğitim verisi genellikle daha iyi sonuç verir. Veri setinizde çeşitli açılardan ve farklı aydınlatma koşullarında çekilmiş çok sayıda görüntü bulundurmanız modelin doğruluğunu artıracaktır.
+- **Augmentasyon (Veri Çoğaltma):** Eğitim sırasında veri augmentasyonu (döndürme, kırpma, parlaklık artırma vs.) uygulamak modelin genelleme kapasitesini artıracaktır. YoloV5, eğitim sırasında augmentasyonu otomatik olarak uygulayabilir.
+

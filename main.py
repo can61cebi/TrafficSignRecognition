@@ -9,7 +9,7 @@ import threading
 app = Flask(__name__)
 
 # OpenCV ile kamerayı başlatıyoruz
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
 
 # YoloV5 modelini yükle
 model = torch.hub.load('yolov5_model', 'custom', path='yolov5_model/weights/yolov5s.pt', source='local')
