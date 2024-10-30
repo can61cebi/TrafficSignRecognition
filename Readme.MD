@@ -1,61 +1,109 @@
-# Mühendislikte Disiplinlerarası Proje Dersi
+# Trafik İşaretleri Tanıma Sistemi
 
-### 1. **Proje Yapısının Hazırlanması:**
-   - Flask uygulaması için gerekli dosya yapısını oluştur.
-   - Gerekli kütüphaneleri yükle (Flask, OpenCV, YoloV5, pyttsx3, vs).
+## Mühendislikte Disiplinlerarası Proje Dersi
 
-### 2. **Veri Setinin İncelenmesi:**
-   - Verileri anlamak ve veri ön işleme adımlarını hazırlamak. Test ve train verilerinin nasıl işleneceğini inceleyeceğiz.
+**Hazırlayanlar:**
+- **Can Çebi**
+- **Ege Doğru**
+- **Emre Şenel**
 
-### 3. **YoloV5 Modelinin Eğitilmesi ya da Hazır Model Kullanımı:**
-   - YoloV5 ile trafik işaretlerini tanıyacak bir model kullanacağız. Burada mevcut hazır bir model kullanabiliriz ya da eğitim aşamasını gerçekleştirebiliriz.
+**İstanbul Arel Üniversitesi, 4. Sınıf Öğrencileri**
 
-### 4. **OpenCV ile Kamera Entegrasyonu:**
-   - Kullanıcının web kamerası ile bağlantı kurmak ve video akışını işlemek.
+---
 
-### 5. **Trafik İşareti Tanıma:**
-   - OpenCV ve YoloV5 ile kamera görüntülerinden trafik işaretlerini tespit etme.
+## İçindekiler
 
-### 6. **Sonuçların Görüntülenmesi ve Sesli Çıktı:**
-   - Tespit edilen trafik işaretini ekranda gösterme ve pyttsx3 ile Türkçe olarak sesli okuma.
+1. [Proje Hakkında](#1-proje-hakkında)
+2. [Veri Seti ve Kaynak](#2-veri-seti-ve-kaynak)
+3. [Gerekli Kütüphaneler ve Kurulum](#3-gerekli-kütüphaneler-ve-kurulum)
+4. [Proje Yapısı](#4-proje-yapısı)
+5. [Flask ile Web Arayüzü Oluşturma](#5-flask-ile-web-arayüzü-oluşturma)
+6. [YoloV5 Entegrasyonu](#6-yolov5-entegrasyonu)
+   - [6.1. YoloV5 Kurulumu](#61-yolov5-kurulumu)
+   - [6.2. Modelin Python ile Kullanımı](#62-modelin-python-ile-kullanımı)
+7. [Veri Setinin Hazırlanması ve Eğitimi](#7-veri-setinin-hazırlanması-ve-eğitimi)
+   - [7.1. Veri Seti Düzenlemesi](#71-veri-seti-düzenlemesi)
+   - [7.2. `data.yaml` Dosyasının Oluşturulması](#72-datayaml-dosyasının-oluşturulması)
+   - [7.3. XML'den Yolo Formatına Dönüşüm](#73-xmlden-yolo-formatına-dönüşüm)
+   - [7.4. Modelin Eğitimi](#74-modelin-eğitimi)
+8. [Sonuçların Görüntülenmesi ve Sesli Çıktı](#8-sonuçların-görüntülenmesi-ve-sesli-çıktı)
+9. [Proje Dizin Yapısı](#9-proje-dizin-yapısı)
+10. [Kaynakça](#10-kaynakça)
 
-### 7. **Flask ile Web Arayüzü Oluşturma:**
-   - Web tabanlı bir arayüz hazırlayacağız, burada kamera akışını gösterecek ve sonuçları sunacağız.
+---
 
-Bu adımlara başladıkça her birini detaylandıracağız. Şimdi ilk adıma, **Proje Yapısının Hazırlanmasına** geçelim.
+## 1. Proje Hakkında
 
-### **Proje Yapısının Hazırlanması**
+Bu proje, **trafik işaretlerini gerçek zamanlı olarak tanıyabilen bir sistem** geliştirmeyi amaçlamaktadır. Proje kapsamında:
 
-**Gerekli Kütüphaneler:**
-   - Flask: Web framework.
-   - OpenCV: Görüntü işleme.
-   - Pyttsx3: Sesli çıktı.
-   - YoloV5: Trafik işaretlerini tanımak için model.
+- **OpenCV** ve **YoloV5** kullanılarak trafik işaretleri tespit edilmekte,
+- **Pyttsx3** kütüphanesi ile tespit edilen işaretler sesli olarak ifade edilmekte,
+- Kullanıcı arayüzü **Flask** web framework'ü ile oluşturulmuştur.
 
-İlk olarak, bu kütüphaneleri yükleyelim. Aşağıdaki komutları terminal üzerinden çalıştırabilirsin:
+---
+
+## 2. Veri Seti ve Kaynak
+
+Projemizde kullanılan veri seti, **Fırat Üniversitesi Büyük Veri ve Yapay Zeka Laboratuvarı**'nın [**Veri Setleri**](http://buyukveri.firat.edu.tr/veri-setleri/) bölümünden indirilmiştir. Bu veri seti:
+
+- **1250 adet çekilmiş görüntü** içermektedir ve eğitim için kullanılmıştır.
+- **41 farklı trafik işareti etiketini** kapsamaktadır.
+
+Akademik çalışmalarda kaynak belirtmek önemli olduğundan, veri setini sağlayan **Fırat Üniversitesi Büyük Veri ve Yapay Zeka Laboratuvarı**'na teşekkür ederiz.
+
+---
+
+## 3. Gerekli Kütüphaneler ve Kurulum
+
+Projenin çalışabilmesi için aşağıdaki Python kütüphanelerinin kurulması gerekmektedir:
+
+- **Flask**: Web uygulaması oluşturmak için.
+- **OpenCV**: Görüntü işleme için.
+- **Pyttsx3**: Sesli çıktı için.
+- **YoloV5**: Trafik işaretlerini tanımak için derin öğrenme modeli.
+
+**Kurulum için aşağıdaki komutu terminalde çalıştırabilirsiniz:**
 
 ```bash
-pip install Flask opencv-python pyttsx3 torch torchvision
+pip install Flask opencv-python pyttsx3 torch torchvision pandas numpy tqdm PyYAML requests
 ```
 
+---
 
-### 1. **Gerekli Klasör ve Dosyaların Yapılandırılması:**
+## 4. Proje Yapısı
 
-Proje yapısında birkaç ek dosya oluşturacağız:
+Proje dosyaları ve klasörleri aşağıdaki gibi yapılandırılmıştır:
 
-1. `yolov5_model/` — Bu klasörde YoloV5 model dosyalarını tutacağız.
-2. `static/` ve `templates/` klasörlerini oluşturalım:
-   - `static/css/`: CSS dosyaları için.
-   - `static/js/`: JavaScript dosyaları için.
-   - `templates/`: Flask'ın kullanacağı HTML dosyalarını buraya ekleyeceğiz (örneğin `index.html`).
+```
+TrafikIsaretleriTanima/
+├── .venv/
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── script.js
+├── templates/
+│   └── index.html
+├── traffic_signs_dataset_v1/
+│   ├── images/
+│   │   ├── train/           # Eğitim görüntüleri (JPG)
+│   │   └── val/             # Doğrulama görüntüleri (JPG)
+│   ├── labels/
+│   │   ├── train/           # Eğitim etiketleri (TXT - Yolo formatı)
+│   │   └── val/             # Doğrulama etiketleri (TXT - Yolo formatı)
+│   ├── data.yaml            # Yolo eğitim konfigürasyon dosyası
+│   └── label_map.pbtxt      # Sınıf haritası
+├── yolov5_model/            # YoloV5 dosyaları (model eğitimi için)
+├── main.py                  # Flask uygulama kodu
+├── xml_to_yolo_converter.py # XML'den Yolo'ya dönüştürücü script
+└── README.md
+```
 
-Bunları projenin kök dizinine ekledikten sonra Flask ile basit bir web arayüzü oluşturmaya başlayabiliriz.
+---
 
-### 2. **Flask ile Temel Web Uygulamasını Kurma:**
+## 5. Flask ile Web Arayüzü Oluşturma
 
-İlk olarak, basit bir Flask uygulaması oluşturalım. `main.py` dosyanda temel bir Flask yapılandırması kuracağız.
-
-Aşağıdaki kodu `main.py` dosyana ekle:
+**`main.py`** dosyasını oluşturup aşağıdaki kodu ekleyin:
 
 ```python
 from flask import Flask, render_template, Response
@@ -89,154 +137,289 @@ if __name__ == "__main__":
     app.run(debug=True)
 ```
 
-Bu kod, Flask uygulamasını başlatır ve kamera akışını web arayüzüne yönlendirir. Ayrıca `index.html` sayfasında kamera görüntüsünü göstereceğiz.
-
-### 3. **HTML Sayfasının Oluşturulması:**
-
-Şimdi `templates/index.html` dosyasını oluştur ve aşağıdaki kodu ekle:
+**`templates/index.html`** dosyasını oluşturup aşağıdaki kodu ekleyin:
 
 ```html
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trafik İşareti Tanıma</title>
 </head>
 <body>
     <h1>Canlı Kamera Akışı</h1>
-    <img src="{{ url_for('video_feed') }}" width="600">
+    <img src="{{ url_for('video_feed') }}" width="1280">
 </body>
 </html>
 ```
 
-Bu sayfa, Flask ile oluşturulan kamera akışını gösterecek.
+Bu adımda, web arayüzü oluşturulmuş ve kamera akışı web sayfasına entegre edilmiştir.
 
-### 4. **Proje İçinde YoloV5 Modelinin Kurulumu:**
+---
 
-YoloV5 modelini kullanacağız. Burada iki seçeneğimiz var: Kendi modelimizi eğitebiliriz veya önceden eğitilmiş bir YoloV5 modelini yükleyip kullanabiliriz.
+## 6. YoloV5 Entegrasyonu
 
-#### YoloV5 Modelinin Yüklenmesi:
-GitHub üzerinden YoloV5'i projenize klonlayın:
+### 6.1. YoloV5 Kurulumu
+
+YoloV5 modelini projenize eklemek için aşağıdaki adımları izleyin:
 
 ```bash
 git clone https://github.com/ultralytics/yolov5 yolov5_model/
 ```
 
-`yolov5_model/` dizini içinde YoloV5 model dosyalarınızı bulunduracağız. YoloV5’i PyTorch ile kullanarak trafik işaretlerini tespit edeceğiz.
+**Model ağırlıklarını indirin:**
 
-Harika, kamerayı çalıştırmayı başardığına sevindim! Şimdi YoloV5 ile trafik işaretlerini tanıma aşamasına geçebiliriz. Bu aşamada, YoloV5 modelini kullanarak trafik işaretlerini tespit edeceğiz ve bu tespitleri kullanarak modelimizi Flask uygulamasına entegre edeceğiz.
+```bash
+cd yolov5_model
+mkdir weights
+wget https://github.com/ultralytics/yolov5/releases/download/v6.0/yolov5s.pt -P weights/
+```
 
-### YOLOv5 Entegrasyonu Adımları
+### 6.2. Modelin Python ile Kullanımı
 
-1. **YOLOv5 Kurulumu:**
-   YoloV5'i projenin kök dizinine klonlayarak başlayalım. Daha önce belirttiğimiz gibi, bunu yapabilirsin:
+**`main.py`** dosyanızı aşağıdaki şekilde güncelleyin:
 
-   ```bash
-   git clone https://github.com/ultralytics/yolov5 yolov5_model/
-   ```
-   
-   Bu komut, YoloV5'i `yolov5_model/` klasörüne klonlayacak.
+```python
+import torch
+from flask import Flask, render_template, Response
+import cv2
+import pyttsx3
+import time
+from multiprocessing import Process, Queue
 
-2. **Model Ağırlıklarının Yüklenmesi:**
-   Önceden eğitilmiş YoloV5 model ağırlıklarını indirmemiz gerekiyor. YoloV5, çeşitli önceden eğitilmiş ağırlık dosyalarını sunar (örneğin, `yolov5s.pt`). Ağırlıkları `yolov5_model/weights/` klasörüne indirmen gerekiyor:
+# Flask uygulaması
+app = Flask(__name__)
 
-   ```bash
-   # yolov5_model dizininde olmalısın
-   cd yolov5_model
-   mkdir weights
-   wget https://github.com/ultralytics/yolov5/releases/download/v6.0/yolov5s.pt -P weights/
-   ```
+# OpenCV ile kamerayı başlat
+camera = cv2.VideoCapture(0)
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
-   Bu ağırlık dosyasını kullanarak trafik işaretlerini tespit edeceğiz.
+# YoloV5 modelini yükle
+model = torch.hub.load('yolov5_model', 'custom', path='yolov5_model/weights/best.pt', source='local')
 
-3. **Modeli Python ile Kullanmak:**
-   `main.py` dosyanda YoloV5 modelini kullanarak gelen görüntüyü işlemek için bir işlev ekleyeceğiz. Aşağıda, bir çerçeveyi işlemek için YoloV5 kullanımı örnek olarak gösterilmiştir:
+# Zamanlama için değişkenler
+last_console_print_time = 0
 
-   ```python
-   sadece
-   import torch
-   from flask import Flask, render_template, Response
-   import cv2
-   import pyttsx3
-   import time
-   import threading
+# Sesli çıktı için kuyruk
+label_queue = Queue()
 
-   app = Flask(__name__)
+def speech_process(label_queue):
+    engine = pyttsx3.init()
+    engine.setProperty('voice', 'tr')  # Türkçe dil desteği
 
-   camera = cv2.VideoCapture(1)
-
-   model = torch.hub.load('yolov5_model', 'custom', path='yolov5_model/weights/yolov5s.pt', source='local')
-
-   engine = pyttsx3.init()
-   engine.setProperty('voice', 'tr')
-   engine_lock = threading.Lock()
-
-   def say_label(label_name):
-    with engine_lock:
-        engine.say(label_name)
-        engine.runAndWait()
-
-
-   def generate_frames():
+    last_speech_time = time.time()
+    detected_labels = set()
     while True:
+        # 3 saniye boyunca etiketleri topla
+        try:
+            while True:
+                # Non-blocking get with timeout
+                label = label_queue.get(timeout=0.1)
+                detected_labels.add(label)
+        except:
+            # Kuyrukta başka etiket yok
+            pass
+
+        current_time = time.time()
+        if current_time - last_speech_time >= 3:
+            if detected_labels:
+                # İlk tespit edilen etiketi seslendir
+                label_to_speak = next(iter(detected_labels))
+                engine.say(label_to_speak)
+                engine.runAndWait()
+                detected_labels.clear()
+            last_speech_time = current_time
+        time.sleep(0.1)  # CPU kullanımını azaltmak için küçük bir gecikme
+
+def generate_frames():
+    global last_console_print_time
+    while True:
+        # Kameradan görüntü al
         success, frame = camera.read()
         if not success:
-            print("Kameradan görüntü alınamıyor.")
+            print("Kameradan görüntü alınamadı.")
             break
         else:
+            # YoloV5 ile görüntüyü işle
             results = model(frame)
 
+            # Etiketleri ve koordinatları al
             labels, cords = results.xyxyn[0][:, -1], results.xyxyn[0][:, :-1]
+            current_time = time.time()
+            y_offset = 50  # Etiketlerin çerçevede gösterileceği başlangıç noktası
+
             for label, cord in zip(labels, cords):
                 x1, y1, x2, y2, conf = cord
-                if conf > 0.3:  # Güven skoruna göre filtreleme (0.5 yerine daha düşük bir değer kullanarak)
+                if conf > 0.3:  # Güven skoru filtresi
                     x1, y1, x2, y2 = int(x1 * frame.shape[1]), int(y1 * frame.shape[0]), int(x2 * frame.shape[1]), int(y2 * frame.shape[0])
                     label_name = results.names[int(label)]
 
+                    # Çerçeve ve etiket çiz
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     cv2.putText(frame, label_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
 
-                    threading.Thread(target=say_label, args=(label_name,)).start()
+                    # Etiketi ses kuyruğuna ekle
+                    label_queue.put(label_name)
 
-                    print(f"Tespit edilen nesne: {label_name}")
-                    cv2.putText(frame, f"Tespit: {label_name}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                    # Konsola her 1 saniyede bir yazdır
+                    if current_time - last_console_print_time >= 1:
+                        print(f"Algılanan nesne: {label_name}")
+                        last_console_print_time = current_time
 
+                    # Etiketleri web sayfasında göster
+                    cv2.putText(frame, f"Tespit: {label_name}", (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                    y_offset += 30  # Bir sonraki etiket için y koordinatını güncelle
+
+            # Çerçeveyi tarayıcıya gönder
             ret, buffer = cv2.imencode('.jpg', frame)
             if ret:
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-
-   @app.route('/')
-   def index():
+@app.route('/')
+def index():
     return render_template('index.html')
 
-
-   @app.route('/video_feed')
-   def video_feed():
+@app.route('/video_feed')
+def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+if __name__ == "__main__":
+    # Sesli çıktıyı başlat
+    p = Process(target=speech_process, args=(label_queue,))
+    p.start()
 
-   if __name__ == "__main__":
-    print("Flask sunucusu başlatılıyor... Tarayıcınızda http://127.0.0.1:5000 adresine gidin.")
-    app.run(host='0.0.0.0', port=5000, debug=True)
-   ```
-
-   Açıklamalar:
-   - **YOLOv5 Modelini Yüklemek:** `torch.hub.load()` ile `yolov5_model` klasöründen modeli yüklüyoruz. Bu, lokal dosyaları kullanarak YoloV5'i entegre eder.
-   - **Modeli Kullanarak Tespit Yapmak:** `results = model(frame)` ile kameradan alınan görüntü üzerinde tespit işlemi yapıyoruz.
-   - **Güven Skoru ve Kutucuk Çizme:** Tespit edilen her nesne için güven skoru `conf` ile filtre yaparak, sadece belirli bir güven skoru üzerindeki nesneleri görüntüde gösteriyoruz.
-   - **Pyttsx3 ile Sesli Çıktı:** Tespit edilen nesnenin adını `engine.say()` kullanarak Türkçe olarak seslendiriyoruz.
-
-Bu aşamalar tamamlandıktan sonra modeli trafik işaretlerini tanıması yönünde eğiteceğiz.
-
-### Önerilen Dizin Yapısı ve Dosya Yerleşimi
-
-#### Önerilen Dosya Yapısı
+    try:
+        # Flask sunucusunu başlat
+        print("Flask sunucusu başlatılıyor... Tarayıcınızda http://127.0.0.1:5000 adresine gidin.")
+        app.run(host='0.0.0.0', port=5000, debug=False)
+    finally:
+        # Uygulama kapatıldığında ses sürecini sonlandır
+        p.terminate()
+        p.join()
 ```
-TrafikIsaretlerTanima/
+
+---
+
+## 7. Veri Setinin Hazırlanması ve Eğitimi
+
+### 7.1. Veri Seti Düzenlemesi
+
+- **Görüntüleri düzenleme**: İndirdiğimiz veri setindeki `.jpg` dosyalarını `images/train` ve `images/val` klasörlerine taşıdık.
+- **Etiket dosyalarını düzenleme**: `.xml` etiket dosyalarını `labels/train` ve `labels/val` klasörlerine yerleştirdik.
+
+### 7.2. `data.yaml` Dosyasının Oluşturulması
+
+`traffic_signs_dataset_v1` klasörüne `data.yaml` dosyasını oluşturduk:
+
+```yaml
+train: ../traffic_signs_dataset_v1/images/train
+val: ../traffic_signs_dataset_v1/images/val
+
+nc: 41  # Sınıf sayısı
+
+names:
+  0: "30km/h Hız Limiti"
+  1: "50km/h Hız Limiti"
+  2: "60km/h Hız Limiti"
+  3: "70km/h Hız Limiti"
+  4: "90km/h Hız Limiti"
+  5: "Bir Sonraki Kavşakta Geçiş Hakkı"
+  6: "Buzlanma"
+  7: "Dur"
+  8: "Düz veya Sağa Gidiş"
+  9: "Düz veya Sola Gidiş"
+  10: "Engebeli Yol"
+  11: "Geçiş Yasağı Sonu"
+  12: "Geçiş Yasağı"
+  13: "Genel Uyarı"
+  14: "Sağa Sürekli Tehlikeli Viraj"
+  15: "Kaygan Yol"
+  16: "Öncelikli Yol"
+  17: "Sağa Tehlikeli Viraj"
+  18: "Sağdan Gidiniz"
+  19: "Sola Tehlikeli Viraj"
+  20: "Soldan Gidiniz"
+  21: "Trafik Işıkları"
+  22: "Yayalar"
+  23: "Yol Çalışması"
+  24: "Yol Ver"
+  25: "Zorunlu Döner Kavşak"
+  26: "U Dönüşü"
+  27: "U Dönüşü Yasak"
+  28: "Gevşek Yamaç"
+  29: "4.80m'den Yüksek Araç Giremez"
+  30: "Gevşek Malzemeli Yol"
+  31: "Ehli Hayvan Geçebilir"
+  32: "Yaya Geçidi"
+  33: "Duraklamak ve Park Etmek Yasaktır"
+  34: "Her İki Yandan Gidiniz"
+  35: "Sola Sürekli Tehlikeli Viraj"
+  36: "Okul Geçidi"
+  37: "EDS"
+  38: "Eğimli Yol"
+  39: "Yol Daralması"
+  40: "Sağdan Ana Yola Giriş"
+```
+
+### 7.3. XML'den Yolo Formatına Dönüşüm
+
+`xml_to_yolo_converter.py` scriptini oluşturup XML etiket dosyalarını Yolo formatına dönüştürdük:
+
+```python
+import xml.etree.ElementTree as ET
+import os
+
+def convert_to_yolo_format(xml_file, output_txt_path, label_map, img_width, img_height):
+    # Dönüşüm kodları...
+    pass
+
+# Dizinleri belirtin
+xml_dir = 'traffic_signs_dataset_v1/labels/train/'
+output_txt_dir = 'traffic_signs_dataset_v1/labels/train_yolo/'
+
+os.makedirs(output_txt_dir, exist_ok=True)
+
+# Label map'i yükleyin
+label_map = {
+    0: "30km/h Hız Limiti",
+    1: "50km/h Hız Limiti",
+    # Diğer sınıflar...
+}
+
+# Tüm XML dosyalarını işleyin
+for xml_file in os.listdir(xml_dir):
+    if xml_file.endswith('.xml'):
+        xml_path = os.path.join(xml_dir, xml_file)
+        # Dönüşüm işlemi...
+        pass
+```
+
+### 7.4. Modelin Eğitimi
+
+YoloV5 modelini eğitmek için aşağıdaki komutu kullandık:
+
+```bash
+cd yolov5_model
+python train.py --img 640 --batch 16 --epochs 50 --data ../traffic_signs_dataset_v1/data.yaml --weights yolov5s.pt --cache
+```
+
+---
+
+## 8. Sonuçların Görüntülenmesi ve Sesli Çıktı
+
+Eğitilmiş modelimizi kullanarak gerçek zamanlı trafik işareti tespiti yaptık ve sonuçları web arayüzünde görüntüledik. Ayrıca, **Pyttsx3** kütüphanesi ile tespit edilen trafik işaretlerini sesli olarak duyabildik.
+
+---
+
+## 9. Proje Dizin Yapısı
+
+Projenin genel dizin yapısı aşağıdaki gibidir:
+
+```
+TrafikIsaretleriTanima/
 ├── .venv/
 ├── static/
 │   ├── css/
@@ -247,124 +430,23 @@ TrafikIsaretlerTanima/
 │   └── index.html
 ├── traffic_signs_dataset_v1/
 │   ├── images/
-│   │   ├── train/           # Eğitim görüntüleri (JPG)
-│   │   └── val/             # Doğrulama görüntüleri (JPG)
+│   │   ├── train/
+│   │   └── val/
 │   ├── labels/
-│   │   ├── train/           # Eğitim etiketleri (TXT - Yolo formatı)
-│   │   └── val/             # Doğrulama etiketleri (TXT - Yolo formatı)
-│   ├── label_map.pbtxt      # Sınıf haritası
-│   └── data.yaml            # Yolo eğitim konfigürasyon dosyası
-├── yolov5_model/            # YoloV5 dosyaları (yolo eğitimi için kullanacağımız model)
-├── main.py                  # Flask uygulama kodu
-├── xml_to_yolo_converter.py # XML'den Yolo'ya dönüştürücü script
+│   │   ├── train/
+│   │   └── val/
+│   ├── data.yaml
+│   └── label_map.pbtxt
+├── yolov5_model/
+├── main.py
+├── xml_to_yolo_converter.py
 └── README.md
 ```
 
-### Adım Adım Dosya Düzenleme
-1. **Veri Seti Düzenlemesi (traffic_signs_dataset_v1)**
-   - `traffic_signs_dataset_v1` klasöründe:
-     - **Görüntüleri düzenleme**: `train` ve `test` klasörlerinde bulunan `.jpg` dosyalarını `images/train` ve `images/val` klasörlerine taşıyın.
-     - **XML etiket dosyalarını düzenleme**: `train` ve `test` klasörlerindeki `.xml` dosyalarını `labels/train` ve `labels/val` klasörlerine taşıyın. Bu dosyalar dönüşümden sonra Yolo formatında `.txt` dosyalarına dönüştürülecek.
+---
 
-2. **`data.yaml` Dosyasını Oluşturun**
-   - `traffic_signs_dataset_v1` klasörüne `data.yaml` adlı bir dosya oluşturun. Bu dosya YoloV5 eğitiminde veri setinizin yolunu ve sınıflarını tanımlamak için kullanılacak. Örneğin:
+## 10. Kaynakça
 
-   ```yaml
-   train: ../traffic_signs_dataset_v1/images/train
-   val: ../traffic_signs_dataset_v1/images/val
+- **Fırat Üniversitesi Büyük Veri ve Yapay Zeka Laboratuvarı**: [Veri Setleri](http://buyukveri.firat.edu.tr/veri-setleri/)
+  - Bu projede kullanılan trafik levhaları veri seti, Fırat Üniversitesi'nin Büyük Veri ve Yapay Zeka Laboratuvarı web sitesinden indirilmiştir. Veri seti, 1250 adet görüntü ve 41 farklı trafik işareti etiketini içermektedir.
 
-   nc: 19  # Sınıf sayısı
-   names: ['Dur', 'Yol Ver', 'Sağa Git', ...]  # Sınıf isimleri (label_map.pbtxt içindeki sınıflar)
-   ```
-
-3. **XML Dönüşüm Script'i (xml_to_yolo_converter.py)**
-   - Ana dizine (`TrafikIsaretlerTanima/`) `xml_to_yolo_converter.py` dosyasını ekleyin.
-   - Bu script, `labels/train` ve `labels/val` klasörlerindeki `.xml` dosyalarını Yolo formatındaki `.txt` dosyalarına dönüştürecek ve `labels/train` ve `labels/val` klasörlerinde saklayacak.
-
-   Örneğin, aşağıdaki script'i `xml_to_yolo_converter.py` olarak kaydedin ve çalıştırın:
-
-   ```python
-   import xml.etree.ElementTree as ET
-   import os
-
-   def convert_to_yolo_format(xml_file, output_txt_path, label_map, img_width, img_height):
-       tree = ET.parse(xml_file)
-       root = tree.getroot()
-
-       with open(output_txt_path, "w") as out_file:
-           for obj in root.iter('object'):
-               class_name = obj.find('name').text
-               if class_name not in label_map.values():
-                   continue
-
-               # Sınıf adını sınıf ID'sine dönüştürelim
-               class_id = list(label_map.keys())[list(label_map.values()).index(class_name)]
-
-               # Koordinatları alalım
-               bndbox = obj.find('bndbox')
-               xmin = int(bndbox.find('xmin').text)
-               ymin = int(bndbox.find('ymin').text)
-               xmax = int(bndbox.find('xmax').text)
-               ymax = int(bndbox.find('ymax').text)
-
-               # Yolo formatına uygun normalleştirilmiş koordinatları hesaplayalım
-               x_center = ((xmin + xmax) / 2) / img_width
-               y_center = ((ymin + ymax) / 2) / img_height
-               width = (xmax - xmin) / img_width
-               height = (ymax - ymin) / img_height
-
-               # Sonucu dosyaya yazalım
-               out_file.write(f"{class_id} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}\n")
-
-   # Dizinleri belirtelim
-   xml_dir = 'traffic_signs_dataset_v1/labels/train/'  # XML dosyalarının olduğu dizin
-   output_txt_dir = 'traffic_signs_dataset_v1/labels/train/'  # Yolo formatındaki etiketlerin saklanacağı dizin
-
-   os.makedirs(output_txt_dir, exist_ok=True)
-
-   # Label map'i yükleyelim
-   label_map = {
-       0: 'Dur',
-       1: 'Yol Ver',
-       # Diğer sınıflar...
-   }
-
-   # Tüm XML dosyalarını işleyelim
-   for xml_file in os.listdir(xml_dir):
-       if xml_file.endswith('.xml'):
-           xml_path = os.path.join(xml_dir, xml_file)
-           image_file = xml_file.replace('.xml', '.jpg')
-           img_path = os.path.join('traffic_signs_dataset_v1/images/train', image_file)
-
-           # Görüntü boyutlarını XML dosyasından alalım
-           tree = ET.parse(xml_path)
-           root = tree.getroot()
-           img_width = int(root.find('size/width').text)
-           img_height = int(root.find('size/height').text)
-
-           # Yolo formatına uygun TXT dosyasını oluşturalım
-           output_txt_path = os.path.join(output_txt_dir, xml_file.replace('.xml', '.txt'))
-           convert_to_yolo_format(xml_path, output_txt_path, label_map, img_width, img_height)
-   ```
-
-   Bu script'i çalıştırarak XML dosyalarınızı Yolo formatına dönüştürebilirsiniz.
-
-4. **Modeli Eğitmek İçin YoloV5 Kullanımı**
-   - **Eğitim Komutu**: `yolov5_model` dizinine giderek aşağıdaki komutu çalıştırabilirsiniz:
-
-   ```bash
-   python train.py --img 640 --batch 16 --epochs 50 --data ../traffic_signs_dataset_v1/data.yaml --weights yolov5s.pt --cache
-   ```
-
-   Bu komut, `data.yaml` dosyasına uygun olarak modeli eğitecek ve sonuçları `runs/train/exp` klasöründe saklayacaktır.
-
-### Dosyaları Hangi Dizinde Çalıştırmalı?
-- **`xml_to_yolo_converter.py`**: Ana dizinden (`TrafikIsaretlerTanima/`) çalıştırın. Bu script XML dosyalarınızı `labels/train` ve `labels/val` klasörlerine dönüştürecektir.
-- **Yolo Eğitimi (`train.py`)**: `yolov5_model` klasörüne geçip eğitimi başlatın.
-
-### Özet
-1. **Veri Seti Düzenlemesi**: Görüntü ve etiketlerinizi ilgili klasörlere taşıyın.
-2. **XML -> Yolo Formatına Dönüşüm**: `xml_to_yolo_converter.py` script'ini çalıştırarak XML dosyalarınızı Yolo formatına çevirin.
-3. **YoloV5 Eğitimi**: `train.py` dosyasını kullanarak modeli eğitin.
-
-Bu düzenlemeler ve adımlar, veri setinizi Yolo formatına uygun hale getirecek ve modeli başarılı bir şekilde eğitmenizi sağlayacaktır. Yardımcı olmamı istediğiniz başka bir konu olursa lütfen bana bildirin.
