@@ -232,112 +232,139 @@ Harika, kamerayı çalıştırmayı başardığına sevindim! Şimdi YoloV5 ile 
 
 Bu aşamalar tamamlandıktan sonra modeli trafik işaretlerini tanıması yönünde eğiteceğiz.
 
-Trafik işaretlerini tanımak üzere YoloV5 modelini kendi veri setinizle eğitmek için belirli adımlar atmanız gerekiyor. YoloV5’i, özel olarak trafik işaretlerini tanımak üzere eğitmek için aşağıdaki adımları takip edelim:
+### Önerilen Dizin Yapısı ve Dosya Yerleşimi
 
-### 1. **Veri Setinizi Hazırlama**
-Öncelikle veri setinizin Yolo formatında olduğundan emin olmalısınız. Yolo formatında her bir görüntü dosyası için ona karşılık gelen `.txt` dosyaları olmalıdır. Bu `.txt` dosyalarında her satır, bir nesnenin sınıf etiketi ve normalleştirilmiş koordinatlarını içerir.
-
-#### Yolo Veri Seti Formatı:
-- Her görüntünün `.jpg` veya `.png` dosyası olacaktır.
-- Aynı isimle her görüntü için bir `.txt` dosyası olacak.
-- `.txt` dosyası formatı:
-  ```
-  sınıf_id x_center y_center width height
-  ```
-  - `sınıf_id`: Sınıf etiketi (0, 1, 2... gibi).
-  - `x_center`, `y_center`, `width`, `height`: Normalleştirilmiş koordinatlar (0 ile 1 arasında).
-
-Örneğin, bir "Dur" işareti için `.txt` dosyanız şu şekilde olabilir:
+#### Önerilen Dosya Yapısı
 ```
-0 0.5 0.5 0.3 0.4
-```
-
-#### Veri Seti Yapısı:
-Aşağıdaki gibi bir dizin yapısına sahip olmalısınız:
-```
-/traffic_sign_dataset
-    /images
-        /train
-            image1.jpg
-            image2.jpg
-            ...
-        /val
-            imageA.jpg
-            imageB.jpg
-            ...
-    /labels
-        /train
-            image1.txt
-            image2.txt
-            ...
-        /val
-            imageA.txt
-            imageB.txt
-            ...
+TrafikIsaretlerTanima/
+├── .venv/
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── script.js
+├── templates/
+│   └── index.html
+├── traffic_signs_dataset_v1/
+│   ├── images/
+│   │   ├── train/           # Eğitim görüntüleri (JPG)
+│   │   └── val/             # Doğrulama görüntüleri (JPG)
+│   ├── labels/
+│   │   ├── train/           # Eğitim etiketleri (TXT - Yolo formatı)
+│   │   └── val/             # Doğrulama etiketleri (TXT - Yolo formatı)
+│   ├── label_map.pbtxt      # Sınıf haritası
+│   └── data.yaml            # Yolo eğitim konfigürasyon dosyası
+├── yolov5_model/            # YoloV5 dosyaları (yolo eğitimi için kullanacağımız model)
+├── main.py                  # Flask uygulama kodu
+├── xml_to_yolo_converter.py # XML'den Yolo'ya dönüştürücü script
+└── README.md
 ```
 
-### 2. **`data.yaml` Dosyasını Oluşturma**
-YoloV5 eğitimi için bir konfigürasyon dosyasına ihtiyacımız var. Bu dosya, veri setinizin yolunu, sınıf sayısını ve sınıf adlarını içerir. Bu dosyayı `traffic_sign_dataset/data.yaml` olarak oluşturabilirsiniz:
+### Adım Adım Dosya Düzenleme
+1. **Veri Seti Düzenlemesi (traffic_signs_dataset_v1)**
+   - `traffic_signs_dataset_v1` klasöründe:
+     - **Görüntüleri düzenleme**: `train` ve `test` klasörlerinde bulunan `.jpg` dosyalarını `images/train` ve `images/val` klasörlerine taşıyın.
+     - **XML etiket dosyalarını düzenleme**: `train` ve `test` klasörlerindeki `.xml` dosyalarını `labels/train` ve `labels/val` klasörlerine taşıyın. Bu dosyalar dönüşümden sonra Yolo formatında `.txt` dosyalarına dönüştürülecek.
 
-```yaml
-train: ../traffic_sign_dataset/images/train
-val: ../traffic_sign_dataset/images/val
+2. **`data.yaml` Dosyasını Oluşturun**
+   - `traffic_signs_dataset_v1` klasörüne `data.yaml` adlı bir dosya oluşturun. Bu dosya YoloV5 eğitiminde veri setinizin yolunu ve sınıflarını tanımlamak için kullanılacak. Örneğin:
 
-nc: 3  # Sınıf sayısı (örneğin, "Dur", "Yol Ver", "Hız Limiti")
-names: ['Dur', 'Yol Ver', 'Hız Limiti']  # Sınıf isimleri
-```
+   ```yaml
+   train: ../traffic_signs_dataset_v1/images/train
+   val: ../traffic_signs_dataset_v1/images/val
 
-Burada:
-- `train`: Eğitim veri setinin yolu.
-- `val`: Doğrulama veri setinin yolu.
-- `nc`: Sınıf sayısı.
-- `names`: Sınıf isimleri.
+   nc: 19  # Sınıf sayısı
+   names: ['Dur', 'Yol Ver', 'Sağa Git', ...]  # Sınıf isimleri (label_map.pbtxt içindeki sınıflar)
+   ```
 
-### 3. **YoloV5'i Eğitmek İçin Ortamı Hazırlama**
-Eğitim işlemini gerçekleştirmek için YoloV5 ortamını hazırlamanız gerekiyor. Bunun için:
+3. **XML Dönüşüm Script'i (xml_to_yolo_converter.py)**
+   - Ana dizine (`TrafikIsaretlerTanima/`) `xml_to_yolo_converter.py` dosyasını ekleyin.
+   - Bu script, `labels/train` ve `labels/val` klasörlerindeki `.xml` dosyalarını Yolo formatındaki `.txt` dosyalarına dönüştürecek ve `labels/train` ve `labels/val` klasörlerinde saklayacak.
 
-- YoloV5 dizininde olduğunuzdan emin olun:
-  ```bash
-  cd yolov5_model
-  ```
-- Gereksinimleri yükleyin:
-  ```bash
-  pip install -r requirements.txt
-  ```
+   Örneğin, aşağıdaki script'i `xml_to_yolo_converter.py` olarak kaydedin ve çalıştırın:
 
-### 4. **Modeli Eğitme**
-YoloV5'i trafik işaretlerinizi tanıyacak şekilde eğitmek için `train.py` scriptini çalıştırmalısınız:
+   ```python
+   import xml.etree.ElementTree as ET
+   import os
 
-```bash
-python train.py --img 640 --batch 16 --epochs 50 --data traffic_sign_dataset/data.yaml --weights yolov5s.pt --cache
-```
+   def convert_to_yolo_format(xml_file, output_txt_path, label_map, img_width, img_height):
+       tree = ET.parse(xml_file)
+       root = tree.getroot()
 
-Açıklamalar:
-- `--img 640`: Girdi görüntüsünün boyutu. 640, Yolo için yaygın bir boyuttur ve performans ile hız arasında iyi bir denge sağlar.
-- `--batch 16`: Her iterasyonda kaç görüntü ile eğitim yapılacağını belirtir.
-- `--epochs 50`: Eğitim için toplam dönem sayısı.
-- `--data traffic_sign_dataset/data.yaml`: Eğitim için kullanılan veri seti.
-- `--weights yolov5s.pt`: Eğitimin başladığı önceden eğitilmiş model. YoloV5s, daha küçük ve hızlı bir modeldir.
-- `--cache`: Veri setini bellekte tutarak daha hızlı eğitim yapılmasını sağlar.
+       with open(output_txt_path, "w") as out_file:
+           for obj in root.iter('object'):
+               class_name = obj.find('name').text
+               if class_name not in label_map.values():
+                   continue
 
-### 5. **Eğitim Sonrası Ağırlıkların Kullanımı**
-Eğitim tamamlandığında, sonuçlar `runs/train/exp` klasörüne kaydedilecektir. Burada `best.pt` ve `last.pt` ağırlık dosyaları bulunur. Bu ağırlık dosyalarını kullanarak modeli çalıştırabilirsiniz.
+               # Sınıf adını sınıf ID'sine dönüştürelim
+               class_id = list(label_map.keys())[list(label_map.values()).index(class_name)]
 
-### 6. **Modeli Kullanma (Yeniden Entegre Etme)**
-Eğitimden sonra, `main.py` dosyanızda bu yeni ağırlıkları kullanarak modeli entegre edin:
+               # Koordinatları alalım
+               bndbox = obj.find('bndbox')
+               xmin = int(bndbox.find('xmin').text)
+               ymin = int(bndbox.find('ymin').text)
+               xmax = int(bndbox.find('xmax').text)
+               ymax = int(bndbox.find('ymax').text)
 
-```python
-# Eğitilmiş modeli yükle
-model = torch.hub.load('yolov5_model', 'custom', path='runs/train/exp/best.pt', source='local')
-```
+               # Yolo formatına uygun normalleştirilmiş koordinatları hesaplayalım
+               x_center = ((xmin + xmax) / 2) / img_width
+               y_center = ((ymin + ymax) / 2) / img_height
+               width = (xmax - xmin) / img_width
+               height = (ymax - ymin) / img_height
 
-Bu satırda, yeni eğitilmiş modelinizi kullanarak trafik işaretlerini tanımaya başlayabilirsiniz.
+               # Sonucu dosyaya yazalım
+               out_file.write(f"{class_id} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}\n")
 
-### 7. **Modeli Test Etme**
-Modeli Flask tabanlı uygulamanızda test edebilir ve doğru şekilde trafik işaretlerini tanıdığından emin olabilirsiniz. Modelin performansını artırmak için daha fazla epoch kullanabilir veya batch boyutunu artırabilirsiniz.
+   # Dizinleri belirtelim
+   xml_dir = 'traffic_signs_dataset_v1/labels/train/'  # XML dosyalarının olduğu dizin
+   output_txt_dir = 'traffic_signs_dataset_v1/labels/train/'  # Yolo formatındaki etiketlerin saklanacağı dizin
 
-### Ek Notlar:
-- **Görüntü Kalitesi:** Eğitim sırasında görüntülerin kalitesi önemlidir. Düşük kaliteli görüntüler eğitim sonucunu olumsuz etkileyebilir.
-- **Veri Sayısı:** Daha fazla eğitim verisi genellikle daha iyi sonuç verir. Veri setinizde çeşitli açılardan ve farklı aydınlatma koşullarında çekilmiş çok sayıda görüntü bulundurmanız modelin doğruluğunu artıracaktır.
-- **Augmentasyon (Veri Çoğaltma):** Eğitim sırasında veri augmentasyonu (döndürme, kırpma, parlaklık artırma vs.) uygulamak modelin genelleme kapasitesini artıracaktır. YoloV5, eğitim sırasında augmentasyonu otomatik olarak uygulayabilir.
+   os.makedirs(output_txt_dir, exist_ok=True)
 
+   # Label map'i yükleyelim
+   label_map = {
+       0: 'Dur',
+       1: 'Yol Ver',
+       # Diğer sınıflar...
+   }
+
+   # Tüm XML dosyalarını işleyelim
+   for xml_file in os.listdir(xml_dir):
+       if xml_file.endswith('.xml'):
+           xml_path = os.path.join(xml_dir, xml_file)
+           image_file = xml_file.replace('.xml', '.jpg')
+           img_path = os.path.join('traffic_signs_dataset_v1/images/train', image_file)
+
+           # Görüntü boyutlarını XML dosyasından alalım
+           tree = ET.parse(xml_path)
+           root = tree.getroot()
+           img_width = int(root.find('size/width').text)
+           img_height = int(root.find('size/height').text)
+
+           # Yolo formatına uygun TXT dosyasını oluşturalım
+           output_txt_path = os.path.join(output_txt_dir, xml_file.replace('.xml', '.txt'))
+           convert_to_yolo_format(xml_path, output_txt_path, label_map, img_width, img_height)
+   ```
+
+   Bu script'i çalıştırarak XML dosyalarınızı Yolo formatına dönüştürebilirsiniz.
+
+4. **Modeli Eğitmek İçin YoloV5 Kullanımı**
+   - **Eğitim Komutu**: `yolov5_model` dizinine giderek aşağıdaki komutu çalıştırabilirsiniz:
+
+   ```bash
+   python train.py --img 640 --batch 16 --epochs 50 --data ../traffic_signs_dataset_v1/data.yaml --weights yolov5s.pt --cache
+   ```
+
+   Bu komut, `data.yaml` dosyasına uygun olarak modeli eğitecek ve sonuçları `runs/train/exp` klasöründe saklayacaktır.
+
+### Dosyaları Hangi Dizinde Çalıştırmalı?
+- **`xml_to_yolo_converter.py`**: Ana dizinden (`TrafikIsaretlerTanima/`) çalıştırın. Bu script XML dosyalarınızı `labels/train` ve `labels/val` klasörlerine dönüştürecektir.
+- **Yolo Eğitimi (`train.py`)**: `yolov5_model` klasörüne geçip eğitimi başlatın.
+
+### Özet
+1. **Veri Seti Düzenlemesi**: Görüntü ve etiketlerinizi ilgili klasörlere taşıyın.
+2. **XML -> Yolo Formatına Dönüşüm**: `xml_to_yolo_converter.py` script'ini çalıştırarak XML dosyalarınızı Yolo formatına çevirin.
+3. **YoloV5 Eğitimi**: `train.py` dosyasını kullanarak modeli eğitin.
+
+Bu düzenlemeler ve adımlar, veri setinizi Yolo formatına uygun hale getirecek ve modeli başarılı bir şekilde eğitmenizi sağlayacaktır. Yardımcı olmamı istediğiniz başka bir konu olursa lütfen bana bildirin.
