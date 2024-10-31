@@ -406,7 +406,7 @@ cd yolov5_model
 python train.py --img 1280 --batch 8 --epochs 50 --data ../traffic_signs_dataset_v1/data.yaml --weights yolov5m.pt --cache --noval
 ```
 
-## 7.5 Model Eğitim Sonuçları
+## 8 Model Eğitim Sonuçları
 
 YoloV5 modelinin eğitimi tamamlandıktan sonra, modelin hem eğitim hem de doğrulama veri setlerinde gösterdiği performans incelendi. Aşağıda, bu veri setleri üzerindeki bazı tespit sonuçlarını gösteren görseller bulunmaktadır.
 
@@ -425,40 +425,14 @@ YoloV5 modelinin eğitimi tamamlandıktan sonra, modelin hem eğitim hem de doğ
 
 ---
 
-## 8. Sonuçların Görüntülenmesi ve Sesli Çıktı
+## 9. Sonuçların Görüntülenmesi ve Sesli Çıktı
 
 Eğitilmiş modelimizi kullanarak gerçek zamanlı trafik işareti tespiti yaptık ve sonuçları web arayüzünde görüntüledik. Ayrıca, **Pyttsx3** kütüphanesi ile tespit edilen trafik işaretlerini sesli olarak duyabildik.
 
----
 
-## 9. Proje Dizin Yapısı
-
-Projenin genel dizin yapısı aşağıdaki gibidir:
-
-```
-TrafikIsaretleriTanima/
-├── .venv/
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── script.js
-├── templates/
-│   └── index.html
-├── traffic_signs_dataset_v1/
-│   ├── images/
-│   │   ├── train/
-│   │   └── val/
-│   ├── labels/
-│   │   ├── train/
-│   │   └── val/
-│   ├── data.yaml
-│   └── label_map.pbtxt
-├── yolov5_model/
-├── main.py
-├── xml_to_yolo_converter.py
-└── README.md
-```
+| Arayüz 1                                                                     | Arayüz2                                                                |
+|------------------------------------------------------------------------------|------------------------------------------------------------------------|
+| <img src="presentation/sonuc1.png" alt="Arayüz Demosu 1" width="300"/> | <img src="presentation/sonuc2.png" alt="Arayüz Demosu 2" width="300"/> |
 
 ---
 
