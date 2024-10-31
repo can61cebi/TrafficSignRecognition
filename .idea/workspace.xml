@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e3e9cf9c-4cfe-4980-b0d3-a546b2b84ac1" name="Changes" comment="düzenleme: Readme.MD temizlendi">
-      <change afterPath="$PROJECT_DIR$/presentation/Screenshot 2024-10-30 000518.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/presentation/train_batch0.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/presentation/train_batch1.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/presentation/val_batch1_labels.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/presentation/val_batch1_pred.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/presentation/val_batch2_labels.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/presentation/val_batch2_pred.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="e3e9cf9c-4cfe-4980-b0d3-a546b2b84ac1" name="Changes" comment="düzenleme: Readme.MD sonuçlar eklendi">
       <change beforePath="$PROJECT_DIR$/Readme.MD" beforeDir="false" afterPath="$PROJECT_DIR$/Readme.MD" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -132,7 +124,7 @@
       <workItem from="1730365728307" duration="357000" />
       <workItem from="1730366724183" duration="104000" />
       <workItem from="1730367076502" duration="371000" />
-      <workItem from="1730390675693" duration="651000" />
+      <workItem from="1730390675693" duration="849000" />
     </task>
     <task id="LOCAL-00001" summary="ekleme: YOLOv5 ve kamera entegrasyonu saglandi">
       <option name="closed" value="true" />
@@ -166,7 +158,23 @@
       <option name="project" value="LOCAL" />
       <updated>1730294641640</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="düzenleme: Readme.MD sonuçlar eklendi">
+      <option name="closed" value="true" />
+      <created>1730391341577</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1730391341577</updated>
+    </task>
+    <task id="LOCAL-00006" summary="düzenleme: Readme.MD sonuçlar eklendi">
+      <option name="closed" value="true" />
+      <created>1730391345555</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1730391345555</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -177,7 +185,8 @@
     <MESSAGE value="ekleme: YoloV5 isaret isaret veriseti öğrenimi baslanacak" />
     <MESSAGE value="ekleme: trafik levha veriseti eklendi" />
     <MESSAGE value="düzenleme: Readme.MD temizlendi" />
-    <option name="LAST_COMMIT_MESSAGE" value="düzenleme: Readme.MD temizlendi" />
+    <MESSAGE value="düzenleme: Readme.MD sonuçlar eklendi" />
+    <option name="LAST_COMMIT_MESSAGE" value="düzenleme: Readme.MD sonuçlar eklendi" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/TrafikIsaretlerTanima$xml_yolo_donusturucu.coverage" NAME="xml_yolo_donusturucu Coverage Results" MODIFIED="1730139509479" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

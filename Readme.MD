@@ -403,7 +403,7 @@ YoloV5 modelini eğitmek için aşağıdaki komutu kullandık:
 
 ```bash
 cd yolov5_model
-python train.py --img 640 --batch 16 --epochs 50 --data ../traffic_signs_dataset_v1/data.yaml --weights yolov5s.pt --cache
+python train.py --img 1280 --batch 8 --epochs 50 --data ../traffic_signs_dataset_v1/data.yaml --weights yolov5m.pt --cache --noval
 ```
 
 ## 7.5 Model Eğitim Sonuçları
@@ -414,20 +414,21 @@ YoloV5 modelinin eğitimi tamamlandıktan sonra, modelin hem eğitim hem de doğ
 
 Aşağıdaki görsellerde, modelin eğitim veri kümesindeki bir partide çeşitli trafik işaretlerini tespit etme performansı gösterilmektedir. Tespit edilen işaretler, güven skorları ile birlikte etiketlenmiştir.
 
-  ![Eğitim Kümesi Parti 0](presentation/train_batch0.jpg)
-  ![Eğitim Kümesi Parti 1](presentation/train_batch1.jpg)
+  <img src="presentation/train_batch0.jpg" alt="Eğitim Kümesi Parti 0" width="400"/>
+  <img src="presentation/train_batch1.jpg" alt="Eğitim Kümesi Parti 1" width="400"/>
 
 ### Doğrulama Kümesi Sonuçları
 
 Aşağıdaki görseller, doğrulama veri kümesindeki bir partideki tespit sonuçlarını göstermektedir. Her tespit, tahmin edilen etiketler ve doğruluk değerlendirmesi için gerçek etiketler ile işaretlenmiştir.
 
 - **Gerçek Etiketler:**
-  ![Doğrulama Kümesi Parti 1 Gerçek Etiketler](presentation/val_batch1_labels.jpg)
-  ![Doğrulama Kümesi Parti 2 Gerçek Etiketler](presentation/val_batch2_labels.jpg)
+  <img src="presentation/val_batch1_labels.jpg" alt="Doğrulama Kümesi Parti 1 Gerçek Etiketler" width="400"/>
+  <img src="presentation/val_batch2_labels.jpg" alt="Doğrulama Kümesi Parti 2 Gerçek Etiketler" width="400"/>
+
 
 - **Tahmin Edilen Etiketler:**
-  ![Doğrulama Kümesi Parti 1 Tahmin Edilen Etiketler](presentation/val_batch1_pred.jpg)
-  ![Doğrulama Kümesi Parti 2 Tahmin Edilen Etiketler](presentation/val_batch2_pred.jpg)
+  <img src="presentation/val_batch1_pred.jpg" alt="Doğrulama Kümesi Parti 1 Tahmin Edilen Etiketler" width="400"/>
+  <img src="presentation/val_batch2_pred.jpg" alt="Doğrulama Kümesi Parti 2 Tahmin Edilen Etiketler" width="400"/>
 
 
 ---
