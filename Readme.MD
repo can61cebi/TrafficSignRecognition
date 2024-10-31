@@ -406,7 +406,7 @@ cd yolov5_model
 python train.py --img 1280 --batch 8 --epochs 50 --data ../traffic_signs_dataset_v1/data.yaml --weights yolov5m.pt --cache --noval
 ```
 
-## 8 Model Eğitim Sonuçları
+## 8. Model Eğitim Sonuçları
 
 YoloV5 modelinin eğitimi tamamlandıktan sonra, modelin hem eğitim hem de doğrulama veri setlerinde gösterdiği performans incelendi. Aşağıda, bu veri setleri üzerindeki bazı tespit sonuçlarını gösteren görseller bulunmaktadır.
 
