@@ -430,8 +430,8 @@ YoloV5 modelinin eğitimi tamamlandıktan sonra, modelin hem eğitim hem de doğ
 Eğitilmiş modelimizi kullanarak gerçek zamanlı trafik işareti tespiti yaptık ve sonuçları web arayüzünde görüntüledik. Ayrıca, **Pyttsx3** kütüphanesi ile tespit edilen trafik işaretlerini sesli olarak duyabildik.
 
 
-| Arayüz 1                                                                     | Arayüz2                                                                |
-|------------------------------------------------------------------------------|------------------------------------------------------------------------|
+| Demo 1                                                                 | Demo 2                                                                |
+|------------------------------------------------------------------------|-----------------------------------------------------------------------|
 | <img src="presentation/sonuc1.png" alt="Arayüz Demosu 1" width="300"/> | <img src="presentation/sonuc2.png" alt="Arayüz Demosu 2" width="300"/> |
 
 ---
