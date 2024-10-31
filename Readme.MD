@@ -466,5 +466,3 @@ TrafikIsaretleriTanima/
 
 - **Fırat Üniversitesi Büyük Veri ve Yapay Zeka Laboratuvarı**: [Veri Setleri](http://buyukveri.firat.edu.tr/veri-setleri/)
   - Bu projede kullanılan trafik levhaları veri seti, Fırat Üniversitesi'nin Büyük Veri ve Yapay Zeka Laboratuvarı web sitesinden indirilmiştir. Veri seti, 1250 adet görüntü ve 41 farklı trafik işareti etiketini içermektedir.
-
-Bu yazıya sana ekte eklediğim resimleri akışa uygun şekilde modelin görsel olarak train sonuçları kısmını ekler misin?
