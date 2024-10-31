@@ -406,6 +406,30 @@ cd yolov5_model
 python train.py --img 640 --batch 16 --epochs 50 --data ../traffic_signs_dataset_v1/data.yaml --weights yolov5s.pt --cache
 ```
 
+## 7.5 Model Eğitim Sonuçları
+
+YoloV5 modelinin eğitimi tamamlandıktan sonra, modelin hem eğitim hem de doğrulama veri setlerinde gösterdiği performans incelendi. Aşağıda, bu veri setleri üzerindeki bazı tespit sonuçlarını gösteren görseller bulunmaktadır.
+
+### Eğitim Kümesi Sonuçları
+
+Aşağıdaki görsellerde, modelin eğitim veri kümesindeki bir partide çeşitli trafik işaretlerini tespit etme performansı gösterilmektedir. Tespit edilen işaretler, güven skorları ile birlikte etiketlenmiştir.
+
+  ![Eğitim Kümesi Parti 0](presentation/train_batch0.jpg)
+  ![Eğitim Kümesi Parti 1](presentation/train_batch1.jpg)
+
+### Doğrulama Kümesi Sonuçları
+
+Aşağıdaki görseller, doğrulama veri kümesindeki bir partideki tespit sonuçlarını göstermektedir. Her tespit, tahmin edilen etiketler ve doğruluk değerlendirmesi için gerçek etiketler ile işaretlenmiştir.
+
+- **Gerçek Etiketler:**
+  ![Doğrulama Kümesi Parti 1 Gerçek Etiketler](presentation/val_batch1_labels.jpg)
+  ![Doğrulama Kümesi Parti 2 Gerçek Etiketler](presentation/val_batch2_labels.jpg)
+
+- **Tahmin Edilen Etiketler:**
+  ![Doğrulama Kümesi Parti 1 Tahmin Edilen Etiketler](presentation/val_batch1_pred.jpg)
+  ![Doğrulama Kümesi Parti 2 Tahmin Edilen Etiketler](presentation/val_batch2_pred.jpg)
+
+
 ---
 
 ## 8. Sonuçların Görüntülenmesi ve Sesli Çıktı
@@ -450,3 +474,4 @@ TrafikIsaretleriTanima/
 - **Fırat Üniversitesi Büyük Veri ve Yapay Zeka Laboratuvarı**: [Veri Setleri](http://buyukveri.firat.edu.tr/veri-setleri/)
   - Bu projede kullanılan trafik levhaları veri seti, Fırat Üniversitesi'nin Büyük Veri ve Yapay Zeka Laboratuvarı web sitesinden indirilmiştir. Veri seti, 1250 adet görüntü ve 41 farklı trafik işareti etiketini içermektedir.
 
+Bu yazıya sana ekte eklediğim resimleri akışa uygun şekilde modelin görsel olarak train sonuçları kısmını ekler misin?
