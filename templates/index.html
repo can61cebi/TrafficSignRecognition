@@ -1,12 +1,311 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trafik İşareti Tanıma</title>
+  <meta charset="UTF-8" />
+  <title>Trafik İşareti Tanıma</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* Sticky Footer için gerekli */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      background: #212529; /* Arka plan koyu */
+      color: #fff;
+      font-family: "Arial", sans-serif;
+    }
+    main {
+      flex: 1 0 auto; /* İçerik alanı genişlesin */
+      padding-bottom: 1rem; /* Footer'a yer bırakmak için */
+    }
+    footer {
+      flex-shrink: 0; /* Footer alta yapışsın */
+      background-color: #343a40;
+      color: #ccc;
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+    .navbar {
+      background-color: #343a40;
+    }
+
+    .container {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .ratio-16x9 {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      border: 2px solid #444;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    /* Tespit Kutusu */
+    .detection-box {
+      width: 100%;
+      max-width: 800px;
+      margin: 1rem auto;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      padding: 1rem;
+      /* Varsayılan min-height */
+      min-height: 150px; /* Kutunun en az bu kadar yüksek kalmasını sağlıyoruz */
+    }
+    .detection-title {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    .detection-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      /* İçerikte de minimum bir yükseklik belirleyebiliriz */
+      min-height: 80px;
+    }
+    .detection-content img {
+      max-height: 80px;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+    }
+
+    /* Daha küçük select kutusu */
+    .small-select {
+      max-width: 200px;
+    }
+  </style>
 </head>
+
 <body>
-    <h1>Canlı Kamera Akışı</h1>
-    <img src="{{ url_for('video_feed') }}" width="1280">
+  <!-- Header / Navbar -->
+  <nav class="navbar navbar-dark">
+    <div class="container d-flex justify-content-between">
+      <a class="navbar-brand fw-bold" href="#">Trafik İşareti Tanıma</a>
+      <!-- Hakkında butonu (Modal açar) -->
+      <button
+        class="btn btn-outline-light btn-sm"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#aboutModal"
+      >
+        Hakkında
+      </button>
+    </div>
+  </nav>
+
+  <!-- Ana içerik -->
+  <main>
+    <div class="container">
+      <h2 class="text-center">Canlı Kamera Akışı</h2>
+      <!-- 16:9 Oranlı Video -->
+      <div class="ratio ratio-16x9">
+        <img
+          src="{{ url_for('video_feed') }}"
+          class="img-fluid"
+          alt="Canlı Kamera Akışı"
+        />
+      </div>
+
+      <!-- Tespit Edilen Levha Bilgileri -->
+      <div class="detection-box" id="detection-info">
+        <div class="detection-title" id="detection-title">
+          Tespit Edilen Levha
+        </div>
+        <div class="detection-content" id="detection-content">
+          <p class="m-0">Tespit edilmedi</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kamera Seçme Div (sayfanın en altında, footer'ın hemen üstünde) -->
+    <div class="container">
+      <div class="text-center">
+        <h4>Kamera Seçimi</h4>
+        <div class="mb-3 mx-auto small-select">
+          <label for="cameraSelect" class="form-label">Kamera Seç:</label>
+          <select id="cameraSelect" class="form-select form-select-sm">
+            <option value="">Yükleniyor...</option>
+          </select>
+        </div>
+        <button id="setCameraBtn" class="btn btn-primary btn-sm">
+          Kamerayı Ayarla
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p class="mb-0">© 2024 Trafik İşareti Tanıma. Tüm hakları saklıdır.</p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  ></script>
+
+  <!-- Tespit Edilen Bilgiyi (JSON) Almak İçin Polling (300ms) -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1) Kamera Listesi Al
+      fetch("/get_cameras")
+        .then((res) => res.json())
+        .then((cameraIndices) => {
+          const selectEl = document.getElementById("cameraSelect");
+          selectEl.innerHTML = ""; // Temizle
+
+          if (cameraIndices.length > 0) {
+            cameraIndices.forEach((idx) => {
+              const option = document.createElement("option");
+              option.value = idx;
+              option.textContent = `Kamera #${idx}`;
+              selectEl.appendChild(option);
+            });
+          } else {
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = "Kamera bulunamadı!";
+            selectEl.appendChild(option);
+          }
+
+          // LocalStorage'daki seçili kamera varsa onu set et
+          const storedIndex = localStorage.getItem("selectedCameraIndex");
+          if (storedIndex !== null && cameraIndices.includes(parseInt(storedIndex))) {
+            selectEl.value = storedIndex;
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          alert("Kamera listesi alınırken hata oluştu!");
+        });
+
+      // 2) "Kamerayı Ayarla" Butonu
+      const btn = document.getElementById("setCameraBtn");
+      btn.addEventListener("click", () => {
+        const selectEl = document.getElementById("cameraSelect");
+        const chosenIndex = selectEl.value;
+
+        if (chosenIndex === "") {
+          alert("Lütfen bir kamera seçiniz!");
+          return;
+        }
+
+        // Sunucuya set_camera isteği gönder
+        fetch("/set_camera", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ camera_index: parseInt(chosenIndex) }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("Kamera ayarlandı:", data);
+            // LocalStorage'a kaydet
+            localStorage.setItem("selectedCameraIndex", chosenIndex);
+            // Sayfayı yenileyerek yeni akışı alalım
+            location.reload();
+          })
+          .catch((err) => {
+            console.error(err);
+            alert("Kamera ayarlanırken hata oluştu!");
+          });
+      });
+    });
+
+    // 3) Tespit Edilen Bilgiyi (JSON) Almak İçin 0.3s (300 ms) aralıkla Polling
+    setInterval(() => {
+      fetch("/get_detection_info")
+        .then((response) => response.json())
+        .then((data) => {
+          const contentEl = document.getElementById("detection-content");
+          contentEl.innerHTML = "";
+
+          if (data.detected && data.signs && data.signs.length > 0) {
+            data.signs.forEach((sign) => {
+              // Resim
+              const imgEl = document.createElement("img");
+              imgEl.src = sign.img_url;
+              imgEl.alt = sign.name;
+
+              // Ad
+              const nameEl = document.createElement("span");
+              nameEl.textContent = sign.name;
+              nameEl.style.marginRight = "1rem";
+
+              contentEl.appendChild(imgEl);
+              contentEl.appendChild(nameEl);
+            });
+          } else {
+            contentEl.textContent = "Tespit edilmedi";
+          }
+        })
+        .catch((err) => console.error(err));
+    }, 300);
+  </script>
+
+  <!-- Modal (Hakkında) -->
+  <div
+    class="modal fade"
+    id="aboutModal"
+    tabindex="-1"
+    aria-labelledby="aboutModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="aboutModalLabel">Hakkında</h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Kapat"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Bu proje, gerçek zamanlı trafik işareti tespiti yapmayı amaçlayan
+            bir bilgisayarlı görü uygulamasıdır. OpenCV, Flask ve PyTorch
+            kullanılarak geliştirilmiştir.
+          </p>
+          <p>
+            Proje Katılımcıları:
+          </p>
+          <ul>
+            <li>Can Çebi</li>
+            <li>Emre Şenel</li>
+            <li>Ege Doğru</li>
+          </ul>
+          <p>Detaylı anlatımlar, proje dosyalarında ve README'de yer almaktadır.</p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Kapat
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
