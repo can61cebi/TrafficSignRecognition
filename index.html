@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>WebRTC YOLO - Camera Select</title>
+</head>
+<body style="background:#212529; color:#fff; font-family:Arial; margin:0; padding:1rem;">
+  <h1>WebRTC YOLO Demo (Camera Select + TTS)</h1>
+  <p>
+    Bu sayfada, tarayıcı kameralarınızı (OBS Virtual Cam dahil) görebilir,
+    seçtiğiniz kamerayı WebRTC ile sunucuya gönderirsiniz.
+    Sunucu YOLO tespiti yapar, bounding box'ları çizip size "remoteVideo" olarak geri gönderir.
+  </p>
+
+  <!-- Kamera Seçme -->
+  <label for="cameraSelect">Kamera Seç:</label>
+  <select id="cameraSelect">
+    <option value="">Kamera listesi alınıyor...</option>
+  </select>
+  <button id="startBtn">Start WebRTC</button>
+
+  <hr/>
+
+  <!-- Local & Remote Video Görünümleri -->
+  <div style="display:flex; gap:1rem;">
+    <!-- Lokal (kendiniz) -->
+    <div>
+      <h4>Local Video</h4>
+      <video id="localVideo" autoplay muted playsinline
+             style="width:320px; border:2px solid #666"></video>
+    </div>
+    <!-- Sunucudan Gelen (Yolo'lu) -->
+    <div>
+      <h4>Remote Video (YOLO Bound Boxes)</h4>
+      <video id="remoteVideo" autoplay playsinline
+             style="width:320px; border:2px solid #666"></video>
+    </div>
+  </div>
+
+  <script>
+    let pc = null;
+    let localStream = null;
+    let dataChannel = null;
+    let remoteStream = null;
+
+    // Tarayıcıda TTS (Türkçe)
+    function speakTextTR(text) {
+      if (!("speechSynthesis" in window)) {
+        console.log("Tarayıcı TTS desteklemiyor.");
+        return;
+      }
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "tr-TR";
+      window.speechSynthesis.speak(utter);
+    }
+
+    // Sayfa yüklenince kameraları listele
+    window.addEventListener("load", async () => {
+      const selectEl = document.getElementById("cameraSelect");
+      selectEl.innerHTML = ""; // temizle
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === "videoinput");
+
+        if (videoDevices.length === 0) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "Kamera bulunamadı!";
+          selectEl.appendChild(opt);
+          return;
+        }
+
+        videoDevices.forEach((dev) => {
+          const opt = document.createElement("option");
+          opt.value = dev.deviceId;
+          opt.textContent = dev.label || Kamera (${dev.deviceId});
+          selectEl.appendChild(opt);
+        });
+      } catch (err) {
+        console.error("enumerateDevices error:", err);
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Kamera erişimi hatası!";
+        selectEl.appendChild(opt);
+      }
+    });
+
+    document.getElementById("startBtn").addEventListener("click", async () => {
+      if (pc) {
+        console.log("Zaten başlatıldı.");
+        return;
+      }
+
+      const selectEl = document.getElementById("cameraSelect");
+      const chosenDeviceId = selectEl.value;
+      if (!chosenDeviceId) {
+        alert("Lütfen bir kamera seçiniz!");
+        return;
+      }
+
+      // PeerConnection oluştur
+      pc = new RTCPeerConnection();
+
+      // DataChannel
+      dataChannel = pc.createDataChannel("clientData");
+      dataChannel.onopen = () => {
+        console.log("DataChannel opened!");
+      };
+      dataChannel.onmessage = (evt) => {
+        const msg = JSON.parse(evt.data);
+        if (msg.type === "detections") {
+          if (msg.objects.length > 0) {
+            // Örnek: ilk tespiti sesli okuyalım
+            speakTextTR(msg.objects[0].label);
+          }
+        }
+        console.log("Sunucudan gelen mesaj:", msg);
+      };
+
+      // Remote Track alındığında
+      remoteStream = new MediaStream();
+      pc.ontrack = (event) => {
+        // Tek track = video
+        remoteStream.addTrack(event.track);
+        document.getElementById("remoteVideo").srcObject = remoteStream;
+      };
+
+      // Seçili kameradan getUserMedia
+      const constraints = {
+        video: {
+          deviceId: { exact: chosenDeviceId },
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 15 }
+        },
+        audio: false
+      };
+      localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      document.getElementById("localVideo").srcObject = localStream;
+
+      // Local track'leri PC'ye ekle
+      localStream.getTracks().forEach(track => {
+        pc.addTrack(track, localStream);
+      });
+
+      // Offer oluştur
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      // Sunucuya gönder
+      const res = await fetch("/offer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sdp: pc.localDescription.sdp,
+          type: pc.localDescription.type
+        })
+      });
+      const ans = await res.json();
+
+      // Answer'ı set et
+      await pc.setRemoteDescription(new RTCSessionDescription(ans));
+
+      console.log("WebRTC handshake tamamlandı. Kameradan sunucuya giden akış + sunucudan gelen YOLO'lu video + dataChannel!");
+    });
+  </script>
+</body>
+</html>
