@@ -74,7 +74,7 @@
         videoDevices.forEach((dev) => {
           const opt = document.createElement("option");
           opt.value = dev.deviceId;
-          opt.textContent = dev.label || Kamera (${dev.deviceId});
+          opt.textContent = dev.label || `Kamera (${dev.deviceId})`;
           selectEl.appendChild(opt);
         });
       } catch (err) {
