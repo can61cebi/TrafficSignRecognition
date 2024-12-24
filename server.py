@@ -41,8 +41,8 @@ class YoloTransformTrack(MediaStreamTrack):
     """
     kind = "video"
 
-    def _init_(self, track, data_channel):
-        super()._init_()
+    def __init__(self, track, data_channel):
+        super().__init__()
         self.track = track
         self.data_channel = data_channel
 
@@ -101,7 +101,7 @@ class YoloTransformTrack(MediaStreamTrack):
 
 async def index(request):
     """ index.html içeriklerini döndürür """
-    here = os.path.dirname(_file_)
+    here = os.path.dirname(__file__)
     with open(os.path.join(here, "index.html"), "r", encoding="utf-8") as f:
         html_content = f.read()
     return web.Response(content_type="text/html", text=html_content)
@@ -161,5 +161,5 @@ async def run_server(host="0.0.0.0", port=8080):
         await asyncio.sleep(3600)
 
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     asyncio.run(run_server())
